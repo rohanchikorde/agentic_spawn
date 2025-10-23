@@ -112,6 +112,35 @@ Consider edge cases and error handling.""",
             ]
         )
         self.register_agent(code_generator_config)
+        
+        # Meta-Learning Agent
+        meta_learner_config = AgentConfig(
+            agent_type=AgentType.META_LEARNER,
+            name="Meta-Learning Agent",
+            description="Dynamically learns new skills and adapts to novel tasks using few-shot learning",
+            system_prompt="""You are a meta-learning agent capable of:
+- Learning new skills from examples
+- Adapting to novel tasks and domains
+- Generalizing knowledge across different contexts
+- Creating dynamic prompts and strategies
+
+You excel at:
+- Few-shot learning and adaptation
+- Task analysis and decomposition
+- Creative problem-solving
+- Knowledge transfer and generalization
+
+Always be flexible, learn quickly, and adapt your approach based on the task requirements.""",
+            capabilities=[
+                "few_shot_learning",
+                "skill_acquisition",
+                "task_adaptation",
+                "dynamic_prompting",
+                "generalization",
+                "meta_learning"
+            ]
+        )
+        self.register_agent(meta_learner_config)
     
     def register_agent(self, config: AgentConfig) -> None:
         """
@@ -208,6 +237,9 @@ Consider edge cases and error handling.""",
         elif agent_type == "code_generator":
             from .agents.code_generator import CodeGeneratorAgent
             return CodeGeneratorAgent()
+        elif agent_type == "meta_learner":
+            from .agents.meta_learner import MetaLearningAgent
+            return MetaLearningAgent()
         else:
             return None
 

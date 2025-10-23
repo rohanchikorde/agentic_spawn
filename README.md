@@ -184,19 +184,27 @@ result = researcher.conduct_research("Machine Learning", depth="comprehensive")
 comparison = researcher.compare_concepts(["REST API", "GraphQL"])
 ```
 
-### Code Generator Agent
-Generates code and engineering solutions:
-- Multi-language code generation
-- Algorithm implementation
-- Architecture guidance
-- Code optimization
+### Meta-Learning Agent
+Dynamically learns new skills and adapts to novel tasks:
+- Few-shot learning from examples
+- On-the-fly capability expansion
+- Task generalization across domains
+- Meta-learning with neural networks (optional)
 
 ```python
-from src.agents.code_generator import CodeGeneratorAgent
+from src.agents.meta_learner import MetaLearningAgent
 
-generator = CodeGeneratorAgent()
-code = generator.generate_code("Implement quicksort", language="python")
-optimized = generator.optimize_code(existing_code)
+meta_agent = MetaLearningAgent()
+
+# Learn a new skill from examples
+examples = [
+    {"input": "Explain recursion", "output": "Recursion is..."},
+    {"input": "Explain cloud computing", "output": "Cloud computing is..."}
+]
+meta_agent.learn_from_examples("Explain technical concepts", examples)
+
+# Adapt to novel tasks
+result = meta_agent.adapt_to_task("Explain quantum entanglement")
 ```
 
 ## � Tool Integration
@@ -397,6 +405,12 @@ Shows agents using external tools for enhanced capabilities.
 python examples/example5_memory_integration.py
 ```
 Demonstrates persistent memory and conversation continuity across sessions.
+
+### Example 6: Meta-Learning Agent
+```bash
+python examples/example6_meta_learning.py
+```
+Demonstrates dynamic skill acquisition and adaptation to novel tasks.
 
 ## 🎨 Customization
 

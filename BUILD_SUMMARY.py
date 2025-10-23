@@ -59,21 +59,24 @@ agentic_spawn/
 │   ├── utils.py                 # Utilities & algorithms (250+ lines)
 │   ├── tool_registry.py         # Tool management system (150+ lines)
 │   ├── tools.py                 # Tool implementations (200+ lines)
-│   └── agents/                  # Specialized Agents (3 types)
+│   └── agents/                  # Specialized Agents (4 types)
 │       ├── __init__.py
 │       ├── data_analyst.py      # Statistical analysis specialist with tools
 │       ├── researcher.py        # Research specialist
-│       └── code_generator.py    # Code generation specialist
+│       ├── code_generator.py    # Code generation specialist
+│       └── meta_learner.py      # Meta-learning agent for dynamic skills
 │
 ├── tests/                        # Test Suite (27+ tests)
 │   └── test_framework.py        # Comprehensive unit tests
 │
-├── examples/                     # Working Examples (5 demos)
+├── examples/                     # Working Examples (7 demos)
 │   ├── getting_started.py       # Interactive getting started
 │   ├── example1_simple_task.py  # Simple task demo
 │   ├── example2_complex_task.py # Multi-agent demo
 │   ├── example3_direct_agents.py# Direct agent usage
-│   └── example4_tool_integration.py # Tool integration demo
+│   ├── example4_tool_integration.py # Tool integration demo
+│   ├── example5_memory_integration.py # Memory integration demo
+│   └── example6_meta_learning.py # Meta-learning agent demo
 │
 ├── requirements.txt              # Python dependencies (8 packages)
 ├── .env.example                  # Environment template
@@ -122,6 +125,7 @@ agentic_spawn/
    • Data Analyst: Statistical analysis, metrics, insights + tool integration
    • Researcher: Information gathering, comparative analysis
    • Code Generator: Multi-language code, architecture
+   • Meta-Learning Agent: Dynamic skill acquisition, few-shot learning
 
 ✅ State Management
    • Task tracking

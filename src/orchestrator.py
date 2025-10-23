@@ -218,9 +218,13 @@ class Orchestrator:
         else:  # COMPLEX
             # Complex tasks: always spawn specialized agents, prioritize detected ones
             agents_to_spawn = required_agents
-            # If no specific agents detected, spawn data_analyst and researcher
+            # If no specific agents detected, spawn meta_learner for novel tasks
             if not agents_to_spawn:
-                agents_to_spawn = ["data_analyst", "researcher"]
+                agents_to_spawn = ["meta_learner"]
+            # For very complex tasks, also consider meta_learner alongside detected agents
+            elif self._is_novel_task(task, keywords):
+                if "meta_learner" not in agents_to_spawn:
+                    agents_to_spawn.append("meta_learner")
         
         state.task_metadata.requires_multiple_agents = len(agents_to_spawn) > 1
         
@@ -410,6 +414,10 @@ Please consider the previous context when responding to maintain continuity."""
                 # Add tool usage to state
                 state.tool_usage.extend(result.get('tool_usage', []))
                 return result.get('analysis', 'No analysis provided')
+            elif hasattr(agent_instance, 'adapt_to_task'):
+                # Meta-learning agent
+                result = agent_instance.adapt_to_task(enhanced_task)
+                return result.get('response', 'No response from meta-learner')
             else:
                 # Other agents - fallback to LLM with memory context
                 prompt = create_agent_prompt(agent_type, enhanced_task)
@@ -443,6 +451,32 @@ Focus on being direct and practical in your responses."""
         
         response = self.llm.invoke(messages)
         return response.content
+    
+    def _is_novel_task(self, task: str, keywords: List[str]) -> bool:
+        """
+        Determine if a task is novel/unrecognized by checking against known agent capabilities.
+        
+        Args:
+            task: The task description
+            keywords: Extracted keywords from the task
+            
+        Returns:
+            True if the task appears novel, False otherwise
+        """
+        # Get all registered agent capabilities
+        all_capabilities = set()
+        for agent_type in self.registry.list_agents().keys():
+            try:
+                capabilities = self.registry.get_agent_capabilities(agent_type)
+                all_capabilities.update(capabilities)
+            except:
+                continue
+        
+        # Check if any keywords match known capabilities
+        keyword_matches = any(keyword.lower() in cap.lower() for keyword in keywords for cap in all_capabilities)
+        
+        # If no keyword matches and task is complex, consider it novel
+        return not keyword_matches
     
     def _aggregate_agent_results(self, task: str, results: Dict[str, str]) -> str:
         """

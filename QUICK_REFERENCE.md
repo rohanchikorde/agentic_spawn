@@ -156,6 +156,11 @@ CODE_GENERATOR:
   - Detects: "code", "implement", "write", "algorithm", "script"
   - Capabilities: code_generation, architecture_design, optimization
   - Use when: Need code or implementation guidance
+
+META_LEARNER:
+  - Detects: Novel/unrecognized tasks, complex adaptation needs
+  - Capabilities: few_shot_learning, skill_acquisition, task_adaptation
+  - Use when: Task doesn't match existing agents or requires learning
 """
 
 # ============================================================================
@@ -201,6 +206,9 @@ python examples/getting_started.py
 python examples/example1_simple_task.py
 python examples/example2_complex_task.py
 python examples/example3_direct_agents.py
+python examples/example4_tool_integration.py
+python examples/example5_memory_integration.py
+python examples/example6_meta_learning.py
 """
 
 # Task 3: Check code quality

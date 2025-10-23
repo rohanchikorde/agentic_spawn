@@ -28,12 +28,12 @@
 | Core Modules | 7 |
 | Memory Modules | 1 |
 | Tool Modules | 2 |
-| Specialized Agents | 3 |
+| Specialized Agents | 4 |
 | Unit Tests | 34+ |
 | Test Coverage | Core modules 100% |
 | Functions/Methods | 80+ |
 | Classes | 25+ |
-| Examples | 6 |
+| Examples | 7 |
 
 ---
 
@@ -243,10 +243,11 @@
    - Conversation context management
    - No API keys required
 
-7. **example5_memory_integration.py**
-   - Full memory integration example
-   - Conversation continuity demonstration
-   - Requires OpenAI API key
+7. **example6_meta_learning.py**
+   - Meta-learning agent demonstrations
+   - Dynamic skill acquisition
+   - Few-shot learning examples
+   - Task adaptation capabilities
 
 ---
 

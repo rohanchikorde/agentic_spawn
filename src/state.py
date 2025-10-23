@@ -15,6 +15,7 @@ class AgentType(str, Enum):
     DATA_ANALYST = "data_analyst"
     RESEARCHER = "researcher"
     CODE_GENERATOR = "code_generator"
+    META_LEARNER = "meta_learner"
     GENERAL = "general"
 
 

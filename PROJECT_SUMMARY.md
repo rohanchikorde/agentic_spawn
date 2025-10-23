@@ -17,7 +17,8 @@ agentic_spawn/
 │       ├── __init__.py
 │       ├── data_analyst.py           # Data analysis specialist with tools (180 lines)
 │       ├── researcher.py             # Research specialist (150 lines)
-│       └── code_generator.py         # Code generation specialist (160 lines)
+│       ├── code_generator.py         # Code generation specialist (160 lines)
+│       └── meta_learner.py           # Meta-learning agent for dynamic skill acquisition (200 lines)
 │
 ├── tests/                            # Comprehensive test suite
 │   └── test_framework.py             # 27+ unit tests (450+ lines)
@@ -27,7 +28,9 @@ agentic_spawn/
 │   ├── example1_simple_task.py       # Simple task example
 │   ├── example2_complex_task.py      # Complex multi-agent example
 │   ├── example3_direct_agents.py     # Direct agent usage
-│   └── example4_tool_integration.py  # Tool integration demo
+│   ├── example4_tool_integration.py  # Tool integration demo
+│   ├── example5_memory_integration.py # Memory integration demo
+│   └── example6_meta_learning.py     # Meta-learning agent demo
 │
 ├── requirements.txt                  # Dependencies (8 packages)
 ├── .env.example                      # Environment template
@@ -109,6 +112,12 @@ agentic_spawn/
 - Algorithm implementation
 - Architecture guidance
 - Code optimization
+
+#### Meta-Learning Agent (`src/agents/meta_learner.py`)
+- Dynamic skill acquisition from examples
+- Few-shot learning capabilities
+- Task adaptation and generalization
+- Neural meta-learning (optional)
 
 ---
 
@@ -197,6 +206,9 @@ Final Response
 2. **example1_simple_task.py**: Simple task processing
 3. **example2_complex_task.py**: Multi-agent orchestration
 4. **example3_direct_agents.py**: Direct agent usage patterns
+5. **example4_tool_integration.py**: Tool integration demonstrations
+6. **example5_memory_integration.py**: Memory and conversation continuity
+7. **example6_meta_learning.py**: Meta-learning and skill acquisition
 
 ---
 
@@ -338,9 +350,10 @@ print(f"Response: {result['final_response']}")
 | Data Analyst | `agents/data_analyst.py` | ~120 |
 | Researcher | `agents/researcher.py` | ~150 |
 | Code Generator | `agents/code_generator.py` | ~160 |
+| Meta-Learning | `agents/meta_learner.py` | ~200 |
 | Tests | `tests/test_framework.py` | ~400 |
-| Examples | `examples/*.py` | ~300 |
-| **Total** | | **~2,120** |
+| Examples | `examples/*.py` | ~400 |
+| **Total** | | **~2,420** |
 
 ---
 
@@ -351,7 +364,7 @@ print(f"Response: {result['final_response']}")
 - ✅ LangGraph for workflow management
 - ✅ Sophisticated complexity assessment
 - ✅ Dynamic agent spawning
-- ✅ Three specialized agent types
+- ✅ Four specialized agent types
 - ✅ Extensible architecture
 - ✅ Comprehensive documentation
 - ✅ Full test coverage

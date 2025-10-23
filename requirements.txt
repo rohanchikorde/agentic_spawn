@@ -8,3 +8,7 @@ python-dotenv>=1.0.0
 requests>=2.31.0
 numpy>=1.24.0
 chromadb>=0.4.0
+
+# Optional: Meta-learning capabilities
+torch>=2.0.0
+learn2learn>=0.2.0
