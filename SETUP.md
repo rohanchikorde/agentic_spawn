@@ -192,8 +192,9 @@ orchestrator = Orchestrator(
 ### Agent Types
 
 - **Data Analyst**: Statistical analysis and metrics
-- **Researcher**: Information gathering and investigation
+- **Researcher**: Information gathering and investigation  
 - **Code Generator**: Code generation and implementation
+- **Meta-Learning Agent**: Dynamic skill acquisition and adaptation
 
 ## Testing
 

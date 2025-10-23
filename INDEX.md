@@ -37,6 +37,7 @@
 | `src/agents/data_analyst.py` | Data analysis specialist | 120+ |
 | `src/agents/researcher.py` | Research specialist | 150+ |
 | `src/agents/code_generator.py` | Code generation specialist | 160+ |
+| `src/agents/meta_learner.py` | Meta-learning agent for dynamic skill acquisition | 200+ |
 
 ### 🧪 Tests (1 file)
 
@@ -107,6 +108,12 @@
 - Architecture guidance
 - Code optimization
 
+**Meta-Learning Agent** (`src/agents/meta_learner.py`)
+- Dynamic skill acquisition from examples
+- Few-shot learning capabilities
+- Task adaptation and generalization
+- AGI advancement through on-the-fly learning
+
 ---
 
 ## 🔄 Workflow Architecture
@@ -174,6 +181,10 @@ Final Response Output
 - Keywords: code, write, implement, function, algorithm, python, java
 - Capabilities: code_generation, algorithm_implementation, architecture_design
 
+### Meta-Learning Agent Triggers
+- Keywords: learn, adapt, teach, skill, novel, new, dynamic, meta
+- Capabilities: few_shot_learning, skill_acquisition, task_adaptation, generalization
+
 ---
 
 ## 📈 Statistics
@@ -184,7 +195,7 @@ Final Response Output
 | Python Files | 19 |
 | Documentation Files | 5 |
 | Core Modules | 5 |
-| Agent Implementations | 3 |
+| Agent Implementations | 4 |
 | Example Scripts | 4 |
 | Test Files | 1 |
 | Unit Tests | 25+ |
@@ -417,7 +428,7 @@ complexity = assess_task_complexity(task, keywords)
 - **Dynamic Agent Spawning**: Only spawns needed agents
 - **Intelligent Complexity Assessment**: Multi-factor analysis
 - **LangGraph Integration**: Graph-based workflows
-- **Three Specialist Agents**: Data, Research, Code
+- **Four Specialist Agents**: Data, Research, Code, Meta-Learning
 - **Extensible Architecture**: Easy to customize
 - **Production Quality**: Tests, docs, error handling
 - **Well Structured**: Clear separation of concerns

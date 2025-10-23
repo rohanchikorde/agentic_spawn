@@ -1,16 +1,26 @@
-# AgentSpawn: Dynamic Multi-Agent Orchestration Framework
+# AgentSpawn: AGI-Advancing Multi-Agent Framework
 
-A production-ready Python framework for dynamic multi-agent orchestration built on LangGraph. AgentSpawn analyzes task complexity and dynamically spawns specialized agents only when needed, combining traditional code logic with LLM-based reasoning.
+A production-ready Python framework for dynamic multi-agent orchestration that advances toward Artificial General Intelligence (AGI). AgentSpawn combines traditional code logic with LLM-based reasoning, featuring **Meta-Learning Agents** that dynamically acquire new skills and adapt to novel tasks without predefined templates.
 
-## 🎯 Core Concept
+## 🎯 Core AGI Advancement Features
 
-**Single Orchestrator Agent** analyzes incoming tasks and:
-1. Assesses complexity using keyword detection and pattern matching
-2. Decides which specialized agents are needed
-3. Spawns only required agents for cost efficiency
-4. Aggregates results into cohesive responses
+**Dynamic Skill Acquisition & Adaptation:**
+- **Meta-Learning Agents**: Learn new capabilities from few-shot examples
+- **Task Generalization**: Apply learned skills to unprecedented scenarios
+- **On-the-Fly Learning**: Expand agent capabilities without code changes
+- **AGI-like Adaptation**: Framework learns and evolves like intelligent systems
 
-This approach balances reasoning flexibility (via LLMs) with decision logic efficiency (via code-based assessment).
+**Intelligent Orchestration:**
+- **Complexity Analysis**: Assesses task requirements using advanced pattern matching
+- **Dynamic Agent Spawning**: Creates specialized agents only when needed for cost efficiency
+- **Multi-Agent Synthesis**: Combines diverse agent outputs into coherent responses
+- **Memory Continuity**: Persistent context across conversations and sessions
+
+**Production-Ready Architecture:**
+- **Scalable Design**: Modular components for easy extension and customization
+- **Tool Integration**: External APIs and tools enhance agent capabilities
+- **Error Resilience**: Comprehensive error handling and graceful degradation
+- **Performance Optimization**: Cost-effective LLM usage through intelligent agent selection
 
 ## 🔧 Tool Integration
 
