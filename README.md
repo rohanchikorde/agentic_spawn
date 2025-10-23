@@ -34,6 +34,17 @@ Tools are automatically selected based on task analysis and integrated into agen
 
 Memory automatically stores conversation history, agent results, and tool usage for future reference.
 
+## 🧠 Meta-Learning Agents (AGI Advancement)
+
+**Dynamic Skill Acquisition** enables agents to learn new capabilities on-the-fly:
+- **Few-Shot Learning**: Learn new skills from minimal examples
+- **Task Adaptation**: Apply learned skills to novel, unseen tasks
+- **Capability Expansion**: Dynamically extend agent capabilities without code changes
+- **Knowledge Generalization**: Transfer learning across different domains
+- **Neural Meta-Learning**: Optional PyTorch/learn2learn integration for advanced adaptation
+
+This breakthrough feature moves the framework significantly closer to AGI by enabling agents to learn and adapt like humans do.
+
 ## 🏗️ Architecture
 
 ```
@@ -76,6 +87,8 @@ pip install -r requirements.txt
 ```bash
 # Create .env file
 OPENAI_API_KEY=your_openai_api_key
+# OR use OpenRouter API (recommended for testing)
+OPENROUTER_API_KEY=your_openrouter_api_key
 
 # Optional: Tool API keys
 SERPAPI_API_KEY=your_serpapi_key          # For web search
@@ -198,13 +211,18 @@ meta_agent = MetaLearningAgent()
 
 # Learn a new skill from examples
 examples = [
-    {"input": "Explain recursion", "output": "Recursion is..."},
-    {"input": "Explain cloud computing", "output": "Cloud computing is..."}
+    {"input": "Write a haiku about autumn leaves", "output": "Crimson leaves whisper..."},
+    {"input": "Write a haiku about the ocean", "output": "Waves crash in rhythm..."}
 ]
-meta_agent.learn_from_examples("Explain technical concepts", examples)
+learn_result = meta_agent.learn_from_examples("Write creative poetry in various forms", examples)
 
-# Adapt to novel tasks
-result = meta_agent.adapt_to_task("Explain quantum entanglement")
+# Adapt to novel tasks using learned skills
+result = meta_agent.adapt_to_task("Write a haiku about technology")
+print(result['response'])  # Generates creative haiku about technology
+
+# View learned skills
+skills = meta_agent.get_learned_skills()
+print(f"Learned skills: {list(skills.keys())}")
 ```
 
 ## � Tool Integration

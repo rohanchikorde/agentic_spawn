@@ -7,6 +7,7 @@ Specialized agent for code generation, implementation guidance, and engineering 
 from typing import Dict, Any, List
 from langchain_openai import ChatOpenAI
 from langchain_core.messages import SystemMessage, HumanMessage
+import os
 
 
 class CodeGeneratorAgent:
@@ -29,7 +30,17 @@ class CodeGeneratorAgent:
             model: LLM model to use
         """
         self.model = model
-        self.llm = ChatOpenAI(model=model, temperature=0.3)
+        
+        # Check for OpenRouter API key first, fallback to OpenAI
+        if os.getenv("OPENROUTER_API_KEY"):
+            self.llm = ChatOpenAI(
+                model=model,
+                temperature=0.3,
+                openai_api_key=os.getenv("OPENROUTER_API_KEY"),
+                openai_api_base="https://openrouter.ai/api/v1"
+            )
+        else:
+            self.llm = ChatOpenAI(model=model, temperature=0.3)
     
     def generate_code(self, requirement: str, language: str = "python") -> Dict[str, Any]:
         """

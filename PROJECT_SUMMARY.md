@@ -118,6 +118,7 @@ agentic_spawn/
 - Few-shot learning capabilities
 - Task adaptation and generalization
 - Neural meta-learning (optional)
+- AGI advancement through on-the-fly learning
 
 ---
 

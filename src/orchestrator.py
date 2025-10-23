@@ -59,7 +59,8 @@ class Orchestrator:
         self.llm = ChatOpenAI(
             model=model_name,
             temperature=temperature,
-            api_key=os.getenv("OPENAI_API_KEY")
+            api_key=os.getenv("OPENROUTER_API_KEY") or os.getenv("OPENAI_API_KEY"),
+            base_url="https://openrouter.ai/api/v1" if os.getenv("OPENROUTER_API_KEY") else None
         )
         self.registry = get_registry()
         
@@ -543,8 +544,15 @@ Provide a unified, cohesive response that leverages insights from all specialist
         config = {}
         if thread_id:
             config["configurable"] = {"thread_id": thread_id}
+        elif self.memory_manager and self.enable_memory and self.memory_manager.get_langgraph_checkpointer():
+            # Provide default thread_id for checkpointer when memory is enabled
+            config["configurable"] = {"thread_id": f"default_{task_metadata.task_id}"}
         
         final_state = self.workflow.invoke(initial_state, config=config)
+        
+        # Handle case where workflow returns a dict instead of OrchestratorState object
+        if isinstance(final_state, dict):
+            return final_state
         
         # Return results with memory information
         return {

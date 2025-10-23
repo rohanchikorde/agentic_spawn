@@ -8,6 +8,7 @@ from typing import Dict, Any, List
 from langchain_openai import ChatOpenAI
 from langchain_core.messages import SystemMessage, HumanMessage
 import time
+import os
 
 from ..tool_registry import get_tool_registry
 from ..state import ToolUsage
@@ -34,7 +35,18 @@ class DataAnalystAgent:
             model: LLM model to use
         """
         self.model = model
-        self.llm = ChatOpenAI(model=model, temperature=0.5)
+        
+        # Check for OpenRouter API key first, fallback to OpenAI
+        if os.getenv("OPENROUTER_API_KEY"):
+            self.llm = ChatOpenAI(
+                model=model,
+                temperature=0.5,
+                openai_api_key=os.getenv("OPENROUTER_API_KEY"),
+                openai_api_base="https://openrouter.ai/api/v1"
+            )
+        else:
+            self.llm = ChatOpenAI(model=model, temperature=0.5)
+        
         self.tool_registry = get_tool_registry()
         self.agent_id = f"data_analyst_{id(self)}"
 

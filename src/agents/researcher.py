@@ -7,6 +7,7 @@ Specialized agent for research tasks, information gathering, and contextual anal
 from typing import Dict, Any, List
 from langchain_openai import ChatOpenAI
 from langchain_core.messages import SystemMessage, HumanMessage
+import os
 
 
 class ResearcherAgent:
@@ -29,7 +30,17 @@ class ResearcherAgent:
             model: LLM model to use
         """
         self.model = model
-        self.llm = ChatOpenAI(model=model, temperature=0.6)
+        
+        # Check for OpenRouter API key first, fallback to OpenAI
+        if os.getenv("OPENROUTER_API_KEY"):
+            self.llm = ChatOpenAI(
+                model=model,
+                temperature=0.6,
+                openai_api_key=os.getenv("OPENROUTER_API_KEY"),
+                openai_api_base="https://openrouter.ai/api/v1"
+            )
+        else:
+            self.llm = ChatOpenAI(model=model, temperature=0.6)
     
     def conduct_research(self, topic: str, depth: str = "comprehensive") -> Dict[str, Any]:
         """

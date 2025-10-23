@@ -8,6 +8,7 @@ Uses few-shot learning and meta-learning techniques to learn new capabilities on
 from typing import Dict, Any, List, Optional
 from langchain_openai import ChatOpenAI
 from langchain_core.messages import SystemMessage, HumanMessage
+import os
 
 try:
     import learn2learn as l2l
@@ -62,7 +63,12 @@ class MetaLearningAgent:
             meta_learning_enabled: Whether to use neural meta-learning
         """
         self.model = model
-        self.llm = ChatOpenAI(model=model, temperature=0.5)
+        self.llm = ChatOpenAI(
+            model=model,
+            temperature=0.5,
+            api_key=os.getenv("OPENROUTER_API_KEY") or os.getenv("OPENAI_API_KEY"),
+            base_url="https://openrouter.ai/api/v1" if os.getenv("OPENROUTER_API_KEY") else None
+        )
         self.learned_skills: Dict[str, Dict[str, Any]] = {}
         self.meta_learning_enabled = meta_learning_enabled and META_LEARNING_AVAILABLE
 
@@ -116,19 +122,18 @@ class MetaLearningAgent:
         Returns:
             Adapted response for the task
         """
-        # Analyze the task
-        task_analysis = self._analyze_task(task)
-
-        # Find relevant learned skills or create new ones
+        # Find relevant learned skills
         relevant_skills = self._find_relevant_skills(task)
 
         if relevant_skills:
             # Use existing learned skills
             skill = relevant_skills[0]
             system_prompt = skill["system_prompt"]
+            used_learned_skill = True
         else:
-            # Generate new approach
-            system_prompt = self._generate_adaptive_prompt(task, task_analysis)
+            # Generate new approach without full task analysis
+            system_prompt = self._generate_adaptive_prompt(task)
+            used_learned_skill = False
 
         # Execute the task
         messages = [
@@ -141,8 +146,7 @@ class MetaLearningAgent:
         return {
             "status": "completed",
             "response": response.content,
-            "task_analysis": task_analysis,
-            "used_learned_skill": bool(relevant_skills),
+            "used_learned_skill": used_learned_skill,
             "agent_type": "meta_learner"
         }
 
@@ -235,12 +239,9 @@ Analysis:"""
                 relevant.append(skill)
         return relevant
 
-    def _generate_adaptive_prompt(self, task: str, task_analysis: Dict[str, Any]) -> str:
+    def _generate_adaptive_prompt(self, task: str) -> str:
         """Generate an adaptive system prompt for a novel task."""
         adaptive_prompt = f"""You are an intelligent AI agent capable of adapting to novel tasks.
-
-Task Analysis:
-{task_analysis['analysis']}
 
 Task: {task}
 

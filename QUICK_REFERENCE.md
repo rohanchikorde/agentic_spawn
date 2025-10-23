@@ -11,7 +11,10 @@ Quick Reference Guide for AgentSpawn Framework
 
 2. Create .env file:
    cp .env.example .env
-   # Edit .env and add your OPENAI_API_KEY
+   # Edit .env and add your API key (OpenAI or OpenRouter)
+   OPENAI_API_KEY=your_openai_api_key
+   # OR
+   OPENROUTER_API_KEY=your_openrouter_api_key
 """
 
 # ============================================================================
@@ -101,20 +104,34 @@ print(f"Complexity: {complexity}")
 print(f"Agents needed: {agents}")
 """
 
-# Pattern 4: Work with Registry
+# Pattern 5: Meta-Learning Agent (AGI Feature)
 """
-from src.agent_registry import get_registry
+from src.agents.meta_learner import MetaLearningAgent
 
-registry = get_registry()
+# Initialize meta-learning agent
+meta_agent = MetaLearningAgent(model="gpt-4")
 
-# List all agents
-agents = registry.list_agents()
+# Learn new skills from examples
+examples = [
+    {"input": "Write a haiku about nature", "output": "Green leaves dance softly..."},
+    {"input": "Write a haiku about technology", "output": "Silicon pathways..."}
+]
 
-# Get capabilities
-capabilities = registry.get_agent_capabilities("data_analyst")
+# Learn the skill
+learn_result = meta_agent.learn_from_examples("Write creative haiku poetry", examples)
 
-# Find agents by capability
-code_agents = registry.get_agent_by_capability("code_generation")
+# Apply to novel tasks
+result = meta_agent.adapt_to_task("Write a haiku about artificial intelligence")
+print(result['response'])
+
+# View learned skills
+skills = meta_agent.get_learned_skills()
+print(f"Learned skills: {list(skills.keys())}")
+
+# Use with orchestrator for novel tasks
+orchestrator = Orchestrator()
+result = orchestrator.process_task("Design a board game about sustainable energy")
+# Meta-learner will be spawned for novel tasks
 """
 
 # ============================================================================
@@ -159,8 +176,9 @@ CODE_GENERATOR:
 
 META_LEARNER:
   - Detects: Novel/unrecognized tasks, complex adaptation needs
-  - Capabilities: few_shot_learning, skill_acquisition, task_adaptation
-  - Use when: Task doesn't match existing agents or requires learning
+  - Capabilities: few_shot_learning, skill_acquisition, task_adaptation, generalization
+  - Use when: Task doesn't match existing agents or requires learning new skills
+  - AGI Feature: Enables dynamic capability expansion without code changes
 """
 
 # ============================================================================
