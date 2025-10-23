@@ -36,7 +36,23 @@ Edit `.env` and add your OpenAI API key:
 OPENAI_API_KEY=sk-your-key-here
 ORCHESTRATOR_MODEL=gpt-4
 ORCHESTRATOR_TEMPERATURE=0.7
+
+# Optional: Tool API keys for enhanced functionality
+SERPAPI_API_KEY=your-serpapi-key-here    # For web search tool
+# Add other tool API keys as needed
 ```
+
+### Tool Configuration
+
+The framework includes several built-in tools that enhance agent capabilities:
+
+- **Code Execution Tool**: No API key required, executes Python/bash code
+- **Database Query Tool**: No API key required, queries SQLite databases
+- **Web Search Tool**: Requires SerpAPI key for external web searches
+- **File System Tool**: No API key required, safe file operations
+- **API Call Tool**: No API key required, makes HTTP requests
+
+Tools are automatically available when their dependencies are met. Agents will use appropriate tools based on task analysis.
 
 ### 3. Verify Installation
 

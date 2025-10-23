@@ -15,15 +15,15 @@ from langchain_openai import ChatOpenAI
 from langchain_core.messages import HumanMessage, SystemMessage
 import dotenv
 
-from state import (
+from .state import (
     OrchestratorState, TaskMetadata, SpawnedAgent, AgentType,
     ComplexityLevel
 )
-from utils import (
+from .utils import (
     assess_task_complexity, detect_required_agents, extract_keywords,
     generate_agent_id, create_agent_prompt
 )
-from agent_registry import get_registry
+from .agent_registry import get_registry
 
 
 # Load environment variables
@@ -201,7 +201,7 @@ class Orchestrator:
                 state.add_agent(agent)
                 
                 # Execute the agent
-                agent_response = self._execute_agent(agent_type, task)
+                agent_response = self._execute_agent(agent_type, task, state)
                 
                 state.update_agent_result(agent_id, agent_response, "completed")
                 
@@ -243,14 +243,15 @@ class Orchestrator:
         state.workflow_status = "complete"
         return state
     
-    def _execute_agent(self, agent_type: str, task: str) -> str:
+    def _execute_agent(self, agent_type: str, task: str, state: OrchestratorState) -> str:
         """
         Execute a specific agent with the given task.
-        
+
         Args:
             agent_type: Type of agent to execute
             task: Task for the agent to perform
-            
+            state: Current orchestrator state for tool tracking
+
         Returns:
             Agent's response/result
         """
@@ -258,18 +259,39 @@ class Orchestrator:
             config = self.registry.get_agent_config(agent_type)
         except ValueError:
             return f"Agent type {agent_type} not found"
-        
-        # Create specialized prompt for this agent
-        prompt = create_agent_prompt(agent_type, task)
-        
-        # Call LLM with agent's system prompt
-        messages = [
-            SystemMessage(content=config.system_prompt),
-            HumanMessage(content=prompt)
-        ]
-        
-        response = self.llm.invoke(messages)
-        return response.content
+
+        # Get the agent instance from registry
+        agent_instance = self.registry.get_agent_instance(agent_type)
+        if not agent_instance:
+            # Fallback to LLM-only execution
+            prompt = create_agent_prompt(agent_type, task)
+            messages = [
+                SystemMessage(content=config.system_prompt),
+                HumanMessage(content=prompt)
+            ]
+            response = self.llm.invoke(messages)
+            return response.content
+
+        # Execute agent with tool support
+        try:
+            if hasattr(agent_instance, 'analyze'):
+                # Data analyst agent
+                result = agent_instance.analyze(task, tool_usage=state.tool_usage)
+                # Add tool usage to state
+                state.tool_usage.extend(result.get('tool_usage', []))
+                return result.get('analysis', 'No analysis provided')
+            else:
+                # Other agents - fallback to LLM
+                prompt = create_agent_prompt(agent_type, task)
+                messages = [
+                    SystemMessage(content=config.system_prompt),
+                    HumanMessage(content=prompt)
+                ]
+                response = self.llm.invoke(messages)
+                return response.content
+
+        except Exception as e:
+            return f"Agent execution failed: {str(e)}"
     
     def _direct_reasoning(self, task: str) -> str:
         """

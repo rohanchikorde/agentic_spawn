@@ -11,14 +11,16 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'src'))
 import unittest
 from datetime import datetime
 
-from state import (
+from src.state import (
     OrchestratorState, TaskMetadata, SpawnedAgent, AgentType, ComplexityLevel
 )
-from utils import (
+from src.utils import (
     extract_keywords, assess_task_complexity, detect_required_agents,
     generate_agent_id, create_agent_prompt
 )
-from agent_registry import AgentRegistry, get_registry, reset_registry
+from src.agent_registry import AgentRegistry, get_registry, reset_registry
+from src.tool_registry import get_tool_registry, reset_tool_registry
+from tool_registry import get_tool_registry, reset_tool_registry
 
 
 class TestState(unittest.TestCase):
@@ -221,6 +223,84 @@ class TestAgentRegistry(unittest.TestCase):
         registry2 = get_registry()
         
         self.assertIs(registry1, registry2)
+
+
+class TestToolIntegration(unittest.TestCase):
+    """Test tool integration functionality."""
+
+    def setUp(self):
+        """Set up test fixtures."""
+        from tool_registry import get_tool_registry, reset_tool_registry
+        reset_tool_registry()
+        self.tool_registry = get_tool_registry()
+
+    def test_tool_registry_initialization(self):
+        """Test that tool registry initializes with default tools."""
+        available_tools = self.tool_registry.get_available_tools()
+        # Should have at least code_execution and database_query (no API keys needed)
+        tool_names = [tool.name for tool in available_tools]
+        self.assertIn("code_execution", tool_names)
+        self.assertIn("database_query", tool_names)
+
+    def test_code_execution_tool(self):
+        """Test code execution tool functionality."""
+        code_tool = self.tool_registry.get_tool("code_execution")
+        self.assertIsNotNone(code_tool)
+
+        # Test simple Python execution
+        result = code_tool.execute("print('Hello World')", "python")
+        self.assertTrue(result.success)
+        self.assertIn("Hello World", result.data.get("output", ""))
+
+    def test_database_tool(self):
+        """Test database tool functionality."""
+        db_tool = self.tool_registry.get_tool("database_query")
+        self.assertIsNotNone(db_tool)
+
+        # Test simple query
+        result = db_tool.execute("SELECT 1", "SELECT")
+        self.assertTrue(result.success)
+
+    def test_web_search_tool_unavailable(self):
+        """Test web search tool when API key is not available."""
+        search_tool = self.tool_registry.get_tool("web_search")
+        # Tool should not be available without API key
+        if search_tool:
+            # If tool exists but API key missing, execution should fail gracefully
+            result = search_tool.execute("test query", 1)
+            self.assertFalse(result.success)
+
+    def test_tool_result_structure(self):
+        """Test that tool results have correct structure."""
+        code_tool = self.tool_registry.get_tool("code_execution")
+        result = code_tool.execute("x = 1 + 1; print(x)", "python")
+
+        self.assertIsInstance(result.success, bool)
+        self.assertIsNotNone(result.data)
+        self.assertIsInstance(result.data, dict)
+
+    def test_agent_tool_integration(self):
+        """Test that agents can use tools."""
+        from src.agents.data_analyst import DataAnalystAgent
+
+        agent = DataAnalystAgent()
+        self.assertTrue(hasattr(agent, 'analyze'))
+
+        # Test that the agent has tool registry access
+        self.assertTrue(hasattr(agent, 'tool_registry'))
+
+        # Test tool usage detection methods exist
+        self.assertTrue(hasattr(agent, '_use_tools_if_needed'))
+        self.assertTrue(hasattr(agent, '_format_tool_results'))
+
+        # Test that tool methods return proper structure
+        task = "Calculate the sum of numbers from 1 to 10 using Python"
+        tool_usage = []
+        tools_used = agent._use_tools_if_needed(task, tool_usage)
+
+        # Should return a list (may be empty if no tools are triggered)
+        self.assertIsInstance(tools_used, list)
+        self.assertIsInstance(tool_usage, list)
 
 
 if __name__ == "__main__":

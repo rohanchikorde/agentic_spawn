@@ -30,23 +30,26 @@ print(result['task_metadata']['complexity'])
 print(result['spawned_agents'])
 """
 
-# Pattern 2: Direct Agent Usage
+# Pattern 3: Tool Integration
 """
-from src.agents.data_analyst import DataAnalystAgent
-from src.agents.researcher import ResearcherAgent
-from src.agents.code_generator import CodeGeneratorAgent
+from src.tool_registry import get_tool_registry
 
-# Data analysis
-analyst = DataAnalystAgent()
-result = analyst.analyze("Analyze sales data")
+# Get available tools
+registry = get_tool_registry()
+tools = registry.get_available_tools()
+print(f"Available tools: {[t.name for t in tools]}")
 
-# Research
-researcher = ResearcherAgent()
-result = researcher.conduct_research("AI trends", depth="comprehensive")
+# Use specific tools
+code_tool = registry.get_tool("code_execution")
+result = code_tool.execute("print('Hello World')", "python")
 
-# Code generation
-generator = CodeGeneratorAgent()
-result = generator.generate_code("Implement binary search", language="python")
+db_tool = registry.get_tool("database_query")
+result = db_tool.execute("SELECT 1", "SELECT")
+
+# Tools are automatically used by agents when appropriate
+orchestrator = Orchestrator()
+result = orchestrator.process_task("Calculate statistics using Python")
+# Agents will automatically use code execution tool
 """
 
 # Pattern 3: Check Complexity Before Processing

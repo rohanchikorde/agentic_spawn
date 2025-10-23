@@ -12,6 +12,17 @@ A production-ready Python framework for dynamic multi-agent orchestration built 
 
 This approach balances reasoning flexibility (via LLMs) with decision logic efficiency (via code-based assessment).
 
+## 🔧 Tool Integration
+
+**External Tool Support** enables agents to perform actions beyond text generation:
+- **Web Search**: Query external APIs (SerpAPI) for real-time information
+- **Code Execution**: Run Python/bash scripts with timeout and security controls
+- **Database Queries**: Execute SQL queries on SQLite databases
+- **File System Operations**: Safe file operations with path restrictions
+- **API Calls**: Make HTTP requests to external services
+
+Tools are automatically selected based on task analysis and integrated into agent workflows.
+
 ## 🏗️ Architecture
 
 ```
@@ -21,14 +32,17 @@ agentic_spawn/
 │   ├── agent_registry.py      # Agent templates and configurations
 │   ├── state.py              # State management and data structures
 │   ├── utils.py              # Complexity assessment and utilities
+│   ├── tool_registry.py      # External tool management system
+│   ├── tools.py              # Tool implementations (web search, code exec, etc.)
 │   ├── agents/               # Individual agent implementations
-│   │   ├── data_analyst.py   # Data analysis specialist
+│   │   ├── data_analyst.py   # Data analysis specialist (with tool integration)
 │   │   ├── researcher.py     # Research and information gathering
 │   │   └── code_generator.py # Code generation and engineering
 │   └── __init__.py
 ├── tests/                     # Comprehensive unit tests
-├── examples/                  # Usage examples
-├── requirements.txt
+├── examples/                  # Usage examples (4 demos)
+├── requirements.txt           # Python dependencies
+├── .env.example              # Environment variables template
 └── README.md
 ```
 
@@ -49,6 +63,11 @@ pip install -r requirements.txt
 ```bash
 # Create .env file
 OPENAI_API_KEY=your_openai_api_key
+
+# Optional: Tool API keys
+SERPAPI_API_KEY=your_serpapi_key          # For web search
+# Other tool configurations as needed
+```
 ```
 
 ## 🚀 Quick Start
@@ -167,7 +186,93 @@ code = generator.generate_code("Implement quicksort", language="python")
 optimized = generator.optimize_code(existing_code)
 ```
 
-## 📊 State Management
+## � Tool Integration
+
+Agents can use external tools to perform actions beyond text generation:
+
+### Available Tools
+
+- **Web Search**: Query external APIs for real-time information
+- **Code Execution**: Run Python/bash scripts with security controls
+- **Database Queries**: Execute SQL on SQLite databases
+- **File System**: Safe file operations with path restrictions
+- **API Calls**: Make HTTP requests to external services
+
+### Tool Usage
+
+```python
+from src.tool_registry import get_tool_registry
+
+# Get tool registry
+registry = get_tool_registry()
+
+# List available tools
+tools = registry.get_available_tools()
+print(f"Available tools: {[t.name for t in tools]}")
+
+# Use code execution tool
+code_tool = registry.get_tool("code_execution")
+result = code_tool.execute("print('Hello from tool!')", "python")
+print(f"Output: {result.data['output']}")
+
+# Use database tool
+db_tool = registry.get_tool("database_query")
+result = db_tool.execute("SELECT sqlite_version()", "SELECT")
+print(f"Version: {result.data['rows'][0][0]}")
+```
+
+### Agent Tool Integration
+
+Agents automatically select and use appropriate tools:
+
+```python
+from src.orchestrator import Orchestrator
+
+orchestrator = Orchestrator()
+
+# Task automatically uses code execution for calculations
+result = orchestrator.process_task(
+    "Calculate the sum of numbers from 1 to 100 using Python"
+)
+
+# Check if tools were used
+for agent in result['spawned_agents']:
+    if 'tools_used' in agent:
+        print(f"Agent {agent['agent_id']} used tools: {agent['tools_used']}")
+```
+
+### Custom Tool Creation
+
+Create new tools by extending `BaseTool`:
+
+```python
+from src.tool_registry import BaseTool, ToolConfig, ToolResult
+from src.tool_registry import ToolType
+
+class CustomTool(BaseTool):
+    def __init__(self, config: ToolConfig):
+        super().__init__(config)
+    
+    def execute(self, **kwargs) -> ToolResult:
+        # Implement tool logic
+        return ToolResult(True, data={"result": "custom output"})
+
+# Register tool
+from src.tool_registry import get_tool_registry
+
+config = ToolConfig(
+    name="custom_tool",
+    tool_type=ToolType.CUSTOM,
+    description="My custom tool",
+    parameters={},
+    required_env_vars=[]
+)
+
+registry = get_tool_registry()
+registry.register_config(config, CustomTool)
+```
+
+## �📊 State Management
 
 The framework uses a hierarchical state structure:
 
@@ -267,6 +372,12 @@ Shows full orchestration with multiple specialized agents.
 python examples/example3_direct_agents.py
 ```
 Demonstrates using individual agents directly.
+
+### Example 4: Tool Integration
+```bash
+python examples/example4_tool_integration.py
+```
+Shows agents using external tools for enhanced capabilities.
 
 ## 🎨 Customization
 

@@ -37,6 +37,19 @@ class TaskMetadata:
 
 
 @dataclass
+class ToolUsage:
+    """Information about tool usage by an agent."""
+    tool_name: str
+    agent_id: str
+    used_at: datetime = field(default_factory=datetime.now)
+    parameters: Dict[str, Any] = field(default_factory=dict)
+    result: Optional[Any] = None
+    success: bool = False
+    error: Optional[str] = None
+    execution_time: Optional[float] = None
+
+
+@dataclass
 class SpawnedAgent:
     """Information about a spawned agent."""
     agent_type: AgentType
@@ -56,10 +69,12 @@ class OrchestratorState:
     - The original user task
     - Task complexity assessment
     - Spawned agents and their results
+    - Tool usage by agents
     - Overall workflow progress
     """
     task_metadata: TaskMetadata
     spawned_agents: List[SpawnedAgent] = field(default_factory=list)
+    tool_usage: List[ToolUsage] = field(default_factory=list)
     orchestrator_reasoning: str = ""
     spawned_agent_results: Dict[str, Any] = field(default_factory=dict)
     final_response: str = ""
@@ -83,3 +98,11 @@ class OrchestratorState:
         """Add an error message to the state."""
         self.error_messages.append(error)
         self.workflow_status = "failed"
+    
+    def add_tool_usage(self, tool_usage: ToolUsage) -> None:
+        """Add tool usage to the state."""
+        self.tool_usage.append(tool_usage)
+    
+    def get_agent_tool_usage(self, agent_id: str) -> List[ToolUsage]:
+        """Get tool usage for a specific agent."""
+        return [usage for usage in self.tool_usage if usage.agent_id == agent_id]

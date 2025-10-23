@@ -6,7 +6,7 @@ Manages agent templates, configurations, and factory methods for creating agents
 
 from typing import Dict, Any, List
 from dataclasses import dataclass
-from state import AgentType
+from .state import AgentType
 
 
 @dataclass
@@ -188,6 +188,28 @@ Consider edge cases and error handling.""",
             if capability in config.capabilities:
                 matching_agents.append(agent_type)
         return matching_agents
+    
+    def get_agent_instance(self, agent_type: str) -> Any:
+        """
+        Get an instance of the specified agent type.
+
+        Args:
+            agent_type: The agent type identifier
+
+        Returns:
+            Agent instance or None if not available
+        """
+        if agent_type == "data_analyst":
+            from .agents.data_analyst import DataAnalystAgent
+            return DataAnalystAgent()
+        elif agent_type == "researcher":
+            from .agents.researcher import ResearcherAgent
+            return ResearcherAgent()
+        elif agent_type == "code_generator":
+            from .agents.code_generator import CodeGeneratorAgent
+            return CodeGeneratorAgent()
+        else:
+            return None
 
 
 # Global registry instance

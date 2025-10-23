@@ -11,25 +11,30 @@ agentic_spawn/
 │   ├── agent_registry.py             # Agent registry system (230 lines)
 │   ├── state.py                      # State management (130 lines)
 │   ├── utils.py                      # Utility functions (250 lines)
+│   ├── tool_registry.py              # Tool management system (150 lines)
+│   ├── tools.py                      # Tool implementations (200 lines)
 │   └── agents/                       # Specialized agents
 │       ├── __init__.py
-│       ├── data_analyst.py           # Data analysis specialist (120 lines)
+│       ├── data_analyst.py           # Data analysis specialist with tools (180 lines)
 │       ├── researcher.py             # Research specialist (150 lines)
 │       └── code_generator.py         # Code generation specialist (160 lines)
 │
 ├── tests/                            # Comprehensive test suite
-│   └── test_framework.py             # 25+ unit tests (400+ lines)
+│   └── test_framework.py             # 27+ unit tests (450+ lines)
 │
 ├── examples/                         # Usage examples
 │   ├── getting_started.py            # Interactive getting started guide
 │   ├── example1_simple_task.py       # Simple task example
 │   ├── example2_complex_task.py      # Complex multi-agent example
-│   └── example3_direct_agents.py     # Direct agent usage
+│   ├── example3_direct_agents.py     # Direct agent usage
+│   └── example4_tool_integration.py  # Tool integration demo
 │
-├── requirements.txt                  # Dependencies
+├── requirements.txt                  # Dependencies (8 packages)
 ├── .env.example                      # Environment template
+├── .gitignore                        # Git ignore rules
 ├── README.md                         # Comprehensive documentation
 ├── QUICK_REFERENCE.md               # Quick reference guide
+├── SETUP.md                         # Setup and configuration guide
 └── PROJECT_SUMMARY.md               # This file
 ```
 

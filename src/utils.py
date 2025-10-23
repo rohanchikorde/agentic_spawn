@@ -7,7 +7,7 @@ Includes helpers for complexity assessment, keyword detection, and common operat
 import re
 import uuid
 from typing import List, Dict, Set
-from state import ComplexityLevel
+from .state import ComplexityLevel
 
 
 # Keyword mappings for complexity assessment
@@ -120,8 +120,10 @@ def assess_task_complexity(text: str, keywords: List[str]) -> ComplexityLevel:
     if max_score == 0:
         return ComplexityLevel.SIMPLE
     
-    for complexity, score in complexity_scores.items():
-        if score == max_score:
+    # Prioritize higher complexity levels when there's a tie
+    complexity_order = [ComplexityLevel.COMPLEX, ComplexityLevel.MODERATE, ComplexityLevel.SIMPLE]
+    for complexity in complexity_order:
+        if complexity_scores[complexity] == max_score:
             return complexity
     
     return ComplexityLevel.SIMPLE
