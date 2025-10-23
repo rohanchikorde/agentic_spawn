@@ -71,6 +71,7 @@ class OrchestratorState:
     - Spawned agents and their results
     - Tool usage by agents
     - Overall workflow progress
+    - Memory context for conversation continuity
     """
     task_metadata: TaskMetadata
     spawned_agents: List[SpawnedAgent] = field(default_factory=list)
@@ -80,6 +81,11 @@ class OrchestratorState:
     final_response: str = ""
     workflow_status: str = "initialized"  # initialized, assessing, spawning, executing, complete, failed
     error_messages: List[str] = field(default_factory=list)
+    
+    # Memory-related fields
+    thread_id: Optional[str] = None
+    conversation_context: Optional[str] = None
+    relevant_memories: List[Dict[str, Any]] = field(default_factory=list)
     
     def add_agent(self, agent: SpawnedAgent) -> None:
         """Add a spawned agent to the state."""
@@ -106,3 +112,18 @@ class OrchestratorState:
     def get_agent_tool_usage(self, agent_id: str) -> List[ToolUsage]:
         """Get tool usage for a specific agent."""
         return [usage for usage in self.tool_usage if usage.agent_id == agent_id]
+    
+    def set_memory_context(self, thread_id: str, context: str, memories: List[Dict[str, Any]] = None) -> None:
+        """Set memory context for the current task."""
+        self.thread_id = thread_id
+        self.conversation_context = context
+        if memories:
+            self.relevant_memories = memories
+    
+    def get_memory_context(self) -> Dict[str, Any]:
+        """Get current memory context."""
+        return {
+            "thread_id": self.thread_id,
+            "conversation_context": self.conversation_context,
+            "relevant_memories": self.relevant_memories
+        }

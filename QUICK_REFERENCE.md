@@ -52,6 +52,42 @@ result = orchestrator.process_task("Calculate statistics using Python")
 # Agents will automatically use code execution tool
 """
 
+# Pattern 4: Memory Integration
+"""
+from src.orchestrator import Orchestrator
+from src.memory import get_memory_manager
+
+# Initialize orchestrator with memory
+orchestrator = Orchestrator(enable_memory=True)
+
+# Use consistent thread ID for conversation continuity
+thread_id = "conversation_001"
+
+# First interaction
+result1 = orchestrator.process_task(
+    "Analyze sales data trends",
+    thread_id=thread_id
+)
+
+# Follow-up using memory context
+result2 = orchestrator.process_task(
+    "What recommendations do you have based on the previous analysis?",
+    thread_id=thread_id  # Same thread ID maintains context
+)
+
+# Direct memory access
+memory_manager = get_memory_manager()
+
+# Retrieve conversation history
+history = memory_manager.get_conversation_history(thread_id, limit=5)
+
+# Semantic search for relevant memories
+relevant = memory_manager.retrieve_memories("sales recommendations", limit=3)
+
+# Get context for new query
+context = memory_manager.get_relevant_context(thread_id, "pricing strategy")
+"""
+
 # Pattern 3: Check Complexity Before Processing
 """
 from src.utils import extract_keywords, assess_task_complexity, detect_required_agents

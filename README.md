@@ -23,6 +23,17 @@ This approach balances reasoning flexibility (via LLMs) with decision logic effi
 
 Tools are automatically selected based on task analysis and integrated into agent workflows.
 
+## 🧠 Persistent Memory System
+
+**Long-term Memory** enables conversation continuity and context retention across sessions:
+- **Vector Database Storage**: ChromaDB for semantic memory and similarity search
+- **Conversation Context**: Maintains thread-based conversation history
+- **LangGraph State Persistence**: Workflow state preservation using LangGraph checkpointers
+- **Intelligent Retrieval**: Context-aware memory retrieval for relevant information
+- **Multi-turn Conversations**: Seamless continuity across multiple interactions
+
+Memory automatically stores conversation history, agent results, and tool usage for future reference.
+
 ## 🏗️ Architecture
 
 ```
@@ -32,6 +43,7 @@ agentic_spawn/
 │   ├── agent_registry.py      # Agent templates and configurations
 │   ├── state.py              # State management and data structures
 │   ├── utils.py              # Complexity assessment and utilities
+│   ├── memory.py             # Persistent memory system (ChromaDB + LangGraph)
 │   ├── tool_registry.py      # External tool management system
 │   ├── tools.py              # Tool implementations (web search, code exec, etc.)
 │   ├── agents/               # Individual agent implementations
@@ -40,9 +52,10 @@ agentic_spawn/
 │   │   └── code_generator.py # Code generation and engineering
 │   └── __init__.py
 ├── tests/                     # Comprehensive unit tests
-├── examples/                  # Usage examples (4 demos)
+├── examples/                  # Usage examples (5 demos)
 ├── requirements.txt           # Python dependencies
 ├── .env.example              # Environment variables template
+├── chroma_db/                # Vector database storage (created automatically)
 └── README.md
 ```
 
@@ -378,6 +391,12 @@ Demonstrates using individual agents directly.
 python examples/example4_tool_integration.py
 ```
 Shows agents using external tools for enhanced capabilities.
+
+### Example 5: Memory Integration
+```bash
+python examples/example5_memory_integration.py
+```
+Demonstrates persistent memory and conversation continuity across sessions.
 
 ## 🎨 Customization
 

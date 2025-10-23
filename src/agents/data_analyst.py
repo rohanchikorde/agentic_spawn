@@ -38,14 +38,15 @@ class DataAnalystAgent:
         self.tool_registry = get_tool_registry()
         self.agent_id = f"data_analyst_{id(self)}"
 
-    def analyze(self, task: str, data_context: str = "", tool_usage: List[ToolUsage] = None) -> Dict[str, Any]:
+    def analyze(self, task: str, data_context: str = "", tool_usage: List[ToolUsage] = None, memory_context: str = "") -> Dict[str, Any]:
         """
-        Perform data analysis on the given task.
+        Perform data analysis on the given task with memory context.
 
         Args:
             task: The analysis task
             data_context: Additional data or context
             tool_usage: List to track tool usage
+            memory_context: Previous conversation context from memory
 
         Returns:
             Dictionary containing analysis results
@@ -68,6 +69,9 @@ Always consider multiple perspectives and potential biases in the data."""
         full_task = task
         if data_context:
             full_task += f"\n\nData Context:\n{data_context}"
+        
+        if memory_context:
+            full_task += f"\n\nPrevious Conversation Context:\n{memory_context}"
 
         if tool_results:
             full_task += f"\n\nTool Results:\n{self._format_tool_results(tool_results)}"

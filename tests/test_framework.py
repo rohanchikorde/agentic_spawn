@@ -303,5 +303,120 @@ class TestToolIntegration(unittest.TestCase):
         self.assertIsInstance(tool_usage, list)
 
 
+class TestMemoryIntegration(unittest.TestCase):
+    """Test memory integration functionality."""
+
+    def setUp(self):
+        """Set up test fixtures."""
+        try:
+            from src.memory import get_memory_manager, MemoryEntry, ConversationContext
+            self.memory_manager = get_memory_manager()
+            self.MemoryEntry = MemoryEntry
+            self.ConversationContext = ConversationContext
+        except ImportError:
+            self.skipTest("Memory dependencies not available")
+
+    def test_memory_manager_initialization(self):
+        """Test memory manager initialization."""
+        self.assertIsNotNone(self.memory_manager)
+
+        # Check that providers are initialized
+        if hasattr(self.memory_manager, 'providers'):
+            self.assertIsInstance(self.memory_manager.providers, dict)
+
+    def test_memory_entry_creation(self):
+        """Test memory entry creation."""
+        entry = self.MemoryEntry(
+            id="test_entry_001",
+            content="Test memory content",
+            metadata={"test": "value"},
+            memory_type="conversation"
+        )
+
+        self.assertEqual(entry.id, "test_entry_001")
+        self.assertEqual(entry.content, "Test memory content")
+        self.assertEqual(entry.metadata["test"], "value")
+        self.assertEqual(entry.memory_type, "conversation")
+
+    def test_conversation_context_creation(self):
+        """Test conversation context creation."""
+        context = self.ConversationContext(
+            thread_id="test_thread_001",
+            user_id="test_user",
+            session_id="test_session"
+        )
+
+        self.assertEqual(context.thread_id, "test_thread_001")
+        self.assertEqual(context.user_id, "test_user")
+        self.assertEqual(context.session_id, "test_session")
+
+    def test_memory_storage_and_retrieval(self):
+        """Test storing and retrieving memories."""
+        # Create test memory
+        entry = self.MemoryEntry(
+            id="test_memory_001",
+            content="This is a test memory for unit testing",
+            metadata={"thread_id": "test_thread", "role": "user"},
+            memory_type="conversation"
+        )
+
+        # Store memory
+        success = self.memory_manager.store_memory(entry)
+        # Note: This may fail if ChromaDB is not available, which is acceptable
+
+        if success:
+            # Try to retrieve similar memories
+            memories = self.memory_manager.retrieve_memories("test memory", limit=5)
+            self.assertIsInstance(memories, list)
+
+            # Check if our memory was stored (it might not be found due to embeddings)
+            # This is more of a smoke test than a strict assertion
+
+    def test_conversation_memory_storage(self):
+        """Test conversation memory storage."""
+        thread_id = "test_conversation_thread"
+
+        # Store conversation memory
+        self.memory_manager.store_conversation_memory(
+            thread_id=thread_id,
+            user_input="Hello, can you help me?",
+            agent_response="Yes, I'd be happy to help!",
+            metadata={"test": True}
+        )
+
+        # This should not raise an exception
+        # Actual retrieval depends on vector store availability
+
+    def test_memory_context_retrieval(self):
+        """Test memory context retrieval."""
+        thread_id = "test_context_thread"
+
+        # Get relevant context (may be empty if no memories exist)
+        context = self.memory_manager.get_relevant_context(thread_id, "test query")
+        self.assertIsInstance(context, str)
+
+    def test_orchestrator_memory_integration(self):
+        """Test orchestrator integration with memory."""
+        from src.orchestrator import Orchestrator
+
+        # Create orchestrator with memory enabled
+        orchestrator = Orchestrator(enable_memory=True)
+
+        # Check that memory manager is available
+        self.assertIsNotNone(orchestrator.memory_manager)
+
+        # Check that workflow has checkpointer when memory is enabled
+        self.assertIsNotNone(orchestrator.workflow.checkpointer)
+
+        # Test that thread_id parameter is accepted (without actually processing)
+        # This verifies the method signature supports memory integration
+        import inspect
+        sig = inspect.signature(orchestrator.process_task)
+        self.assertIn('thread_id', sig.parameters)
+
+        # Verify memory context is expected in return structure
+        # (We can't test actual processing without API key, but we can verify setup)
+
+
 if __name__ == "__main__":
     unittest.main()

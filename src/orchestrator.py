@@ -24,6 +24,7 @@ from .utils import (
     generate_agent_id, create_agent_prompt
 )
 from .agent_registry import get_registry
+from .memory import get_memory_manager, MemoryEntry, ConversationContext
 
 
 # Load environment variables
@@ -39,55 +40,111 @@ class Orchestrator:
     - Agent spawning decisions based on complexity
     - Workflow orchestration using LangGraph
     - Result aggregation from spawned agents
+    - Persistent memory for conversation continuity
     """
     
-    def __init__(self, model_name: str = "gpt-4", temperature: float = 0.7):
+    def __init__(self, model_name: str = "gpt-4", temperature: float = 0.7, enable_memory: bool = True):
         """
         Initialize the orchestrator.
         
         Args:
             model_name: LLM model to use (default: gpt-4)
             temperature: Temperature for LLM responses
+            enable_memory: Whether to enable persistent memory
         """
         self.model_name = model_name
         self.temperature = temperature
+        self.enable_memory = enable_memory
+        
         self.llm = ChatOpenAI(
             model=model_name,
             temperature=temperature,
             api_key=os.getenv("OPENAI_API_KEY")
         )
         self.registry = get_registry()
+        
+        # Initialize memory manager
+        self.memory_manager = get_memory_manager() if enable_memory else None
+        
+        # Build workflow with memory support
         self.workflow = self._build_workflow()
     
     def _build_workflow(self) -> StateGraph:
         """
-        Build the LangGraph workflow for orchestration.
+        Build the LangGraph workflow for orchestration with memory support.
         
         Returns:
-            Configured StateGraph
+            Configured StateGraph with memory integration
         """
         workflow = StateGraph(OrchestratorState)
         
         # Add workflow nodes
+        workflow.add_node("load_memory", self.load_memory_node)
         workflow.add_node("assess_complexity", self.assess_complexity_node)
         workflow.add_node("decide_agents", self.decide_agents_node)
         workflow.add_node("spawn_agents", self.spawn_agents_node)
         workflow.add_node("aggregate_results", self.aggregate_results_node)
+        workflow.add_node("store_memory", self.store_memory_node)
         
-        # Add edges
-        workflow.set_entry_point("assess_complexity")
+        # Add edges with memory integration
+        workflow.set_entry_point("load_memory")
+        workflow.add_edge("load_memory", "assess_complexity")
         workflow.add_edge("assess_complexity", "decide_agents")
         workflow.add_edge("decide_agents", "spawn_agents")
         workflow.add_edge("spawn_agents", "aggregate_results")
-        workflow.add_edge("aggregate_results", END)
+        workflow.add_edge("aggregate_results", "store_memory")
+        workflow.add_edge("store_memory", END)
         
-        return workflow.compile()
+        # Compile with memory checkpointer if available
+        compiled_workflow = workflow.compile()
+        
+        if self.memory_manager and self.enable_memory:
+            checkpointer = self.memory_manager.get_langgraph_checkpointer()
+            if checkpointer:
+                compiled_workflow = workflow.compile(checkpointer=checkpointer)
+        
+        return compiled_workflow
+    
+    def load_memory_node(self, state: OrchestratorState) -> OrchestratorState:
+        """
+        Load relevant memory context for the current task.
+        
+        Args:
+            state: Current orchestrator state
+            
+        Returns:
+            Updated state with memory context
+        """
+        if not self.memory_manager or not self.enable_memory:
+            return state
+        
+        try:
+            thread_id = state.thread_id or f"thread_{state.task_metadata.task_id}"
+            task = state.task_metadata.user_input
+            
+            # Get relevant context from memory
+            context = self.memory_manager.get_relevant_context(thread_id, task)
+            
+            if context:
+                state.set_memory_context(thread_id, context)
+                state.orchestrator_reasoning = f"Loaded memory context for thread {thread_id}. {state.orchestrator_reasoning}"
+            else:
+                state.set_memory_context(thread_id, "")
+                state.orchestrator_reasoning = f"No previous context found for thread {thread_id}. {state.orchestrator_reasoning}"
+                
+        except Exception as e:
+            state.orchestrator_reasoning = f"Memory loading failed: {str(e)}. {state.orchestrator_reasoning}"
+        
+        return state
+    
+        return state
     
     def assess_complexity_node(self, state: OrchestratorState) -> OrchestratorState:
         """
-        Assess the complexity of the task.
+        Assess the complexity of the task with memory context.
         
         Uses keyword detection and pattern matching to determine task complexity.
+        Incorporates memory context for better assessment.
         
         Args:
             state: Current orchestrator state
@@ -97,6 +154,12 @@ class Orchestrator:
         """
         task = state.task_metadata.user_input
         
+        # Include memory context in task analysis if available
+        context_prompt = ""
+        if state.conversation_context:
+            context_prompt = f"\n\nPrevious conversation context:\n{state.conversation_context}"
+            task = f"{task}{context_prompt}"
+        
         # Extract keywords
         keywords = extract_keywords(task)
         state.task_metadata.keywords = keywords
@@ -105,9 +168,12 @@ class Orchestrator:
         complexity = assess_task_complexity(task, keywords)
         state.task_metadata.complexity = complexity
         
-        # Generate reasoning
+        # Generate reasoning with memory awareness
         reasoning = f"Assessed task complexity as {complexity.value}. "
         reasoning += f"Keywords identified: {', '.join(keywords[:5])}. "
+        
+        if state.conversation_context:
+            reasoning += "Incorporated previous conversation context. "
         
         if complexity == ComplexityLevel.SIMPLE:
             reasoning += "Task is straightforward and can be handled by general reasoning."
@@ -243,14 +309,68 @@ class Orchestrator:
         state.workflow_status = "complete"
         return state
     
+    def store_memory_node(self, state: OrchestratorState) -> OrchestratorState:
+        """
+        Store the conversation and results in memory for future reference.
+        
+        Args:
+            state: Current orchestrator state
+            
+        Returns:
+            Updated state (memory storage is side effect)
+        """
+        if not self.memory_manager or not self.enable_memory:
+            return state
+        
+        try:
+            thread_id = state.thread_id or f"thread_{state.task_metadata.task_id}"
+            user_input = state.task_metadata.user_input
+            agent_response = state.final_response
+            
+            # Store conversation memory
+            self.memory_manager.store_conversation_memory(
+                thread_id=thread_id,
+                user_input=user_input,
+                agent_response=agent_response,
+                metadata={
+                    "complexity": state.task_metadata.complexity.value,
+                    "agents_spawned": len(state.spawned_agents),
+                    "tools_used": len(state.tool_usage),
+                    "task_id": state.task_metadata.task_id
+                }
+            )
+            
+            # Store agent results as separate memories for better retrieval
+            for agent in state.spawned_agents:
+                if agent.result:
+                    agent_memory = MemoryEntry(
+                        id=f"{thread_id}_agent_{agent.agent_id}_{datetime.now().isoformat()}",
+                        content=f"Agent {agent.agent_type.value} result: {agent.result}",
+                        metadata={
+                            "thread_id": thread_id,
+                            "agent_type": agent.agent_type.value,
+                            "agent_id": agent.agent_id,
+                            "task_id": state.task_metadata.task_id
+                        },
+                        memory_type="agent_result"
+                    )
+                    self.memory_manager.store_memory(agent_memory)
+            
+            state.orchestrator_reasoning += f"\nStored conversation and results in memory for thread {thread_id}."
+            
+        except Exception as e:
+            state.orchestrator_reasoning += f"\nMemory storage failed: {str(e)}."
+        
+        return state
+    
     def _execute_agent(self, agent_type: str, task: str, state: OrchestratorState) -> str:
         """
-        Execute a specific agent with the given task.
+        Execute a specific agent with the given task and memory context.
 
         Args:
             agent_type: Type of agent to execute
             task: Task for the agent to perform
-            state: Current orchestrator state for tool tracking
+            state: Current orchestrator state for tool tracking and memory
 
         Returns:
             Agent's response/result
@@ -260,11 +380,21 @@ class Orchestrator:
         except ValueError:
             return f"Agent type {agent_type} not found"
 
+        # Include memory context in task if available
+        enhanced_task = task
+        if state.conversation_context:
+            enhanced_task = f"""Previous Context:
+{state.conversation_context}
+
+Current Task: {task}
+
+Please consider the previous context when responding to maintain continuity."""
+
         # Get the agent instance from registry
         agent_instance = self.registry.get_agent_instance(agent_type)
         if not agent_instance:
             # Fallback to LLM-only execution
-            prompt = create_agent_prompt(agent_type, task)
+            prompt = create_agent_prompt(agent_type, enhanced_task)
             messages = [
                 SystemMessage(content=config.system_prompt),
                 HumanMessage(content=prompt)
@@ -272,17 +402,17 @@ class Orchestrator:
             response = self.llm.invoke(messages)
             return response.content
 
-        # Execute agent with tool support
+        # Execute agent with tool support and memory context
         try:
             if hasattr(agent_instance, 'analyze'):
-                # Data analyst agent
-                result = agent_instance.analyze(task, tool_usage=state.tool_usage)
+                # Data analyst agent with memory context
+                result = agent_instance.analyze(enhanced_task, tool_usage=state.tool_usage)
                 # Add tool usage to state
                 state.tool_usage.extend(result.get('tool_usage', []))
                 return result.get('analysis', 'No analysis provided')
             else:
-                # Other agents - fallback to LLM
-                prompt = create_agent_prompt(agent_type, task)
+                # Other agents - fallback to LLM with memory context
+                prompt = create_agent_prompt(agent_type, enhanced_task)
                 messages = [
                     SystemMessage(content=config.system_prompt),
                     HumanMessage(content=prompt)
@@ -347,12 +477,13 @@ Provide a unified, cohesive response that leverages insights from all specialist
         response = self.llm.invoke(messages)
         return response.content
     
-    def process_task(self, task: str) -> Dict[str, Any]:
+    def process_task(self, task: str, thread_id: Optional[str] = None) -> Dict[str, Any]:
         """
-        Process a complete task through the orchestration workflow.
+        Process a complete task through the orchestration workflow with memory support.
         
         Args:
             task: User's task description
+            thread_id: Optional thread ID for conversation continuity
             
         Returns:
             Dictionary containing:
@@ -360,6 +491,7 @@ Provide a unified, cohesive response that leverages insights from all specialist
             - task_metadata: Information about the task
             - spawned_agents: List of spawned agents
             - orchestrator_reasoning: Orchestrator's reasoning process
+            - memory_context: Information about memory usage
         """
         # Create initial state
         task_metadata = TaskMetadata(
@@ -369,10 +501,18 @@ Provide a unified, cohesive response that leverages insights from all specialist
         
         initial_state = OrchestratorState(task_metadata=task_metadata)
         
-        # Execute workflow
-        final_state = self.workflow.invoke(initial_state)
+        # Set thread ID for memory continuity
+        if thread_id:
+            initial_state.thread_id = thread_id
         
-        # Return results
+        # Execute workflow with config for checkpointer
+        config = {}
+        if thread_id:
+            config["configurable"] = {"thread_id": thread_id}
+        
+        final_state = self.workflow.invoke(initial_state, config=config)
+        
+        # Return results with memory information
         return {
             "final_response": final_state.final_response,
             "task_metadata": {
@@ -392,5 +532,6 @@ Provide a unified, cohesive response that leverages insights from all specialist
             ],
             "orchestrator_reasoning": final_state.orchestrator_reasoning,
             "workflow_status": final_state.workflow_status,
-            "errors": final_state.error_messages
+            "errors": final_state.error_messages,
+            "memory_context": final_state.get_memory_context() if hasattr(final_state, 'get_memory_context') else None
         }

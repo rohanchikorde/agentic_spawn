@@ -19,8 +19,11 @@ This installs:
 - `langchain`: LLM framework and utilities
 - `langchain-openai`: OpenAI integration
 - `langchain-core`: Core LLM utilities
+- `langchain-community`: Community integrations (ChromaDB)
 - `pydantic`: Data validation and settings management
 - `python-dotenv`: Environment variable management
+- `chromadb`: Vector database for persistent memory
+- `requests`: HTTP client for API tools
 
 ### 2. Configure Environment
 
@@ -54,6 +57,24 @@ The framework includes several built-in tools that enhance agent capabilities:
 
 Tools are automatically available when their dependencies are met. Agents will use appropriate tools based on task analysis.
 
+### Memory Configuration
+
+The framework includes persistent memory capabilities for conversation continuity:
+
+- **Vector Database**: ChromaDB for semantic memory storage (automatic setup)
+- **LangGraph State Persistence**: Workflow state preservation
+- **Conversation Context**: Thread-based conversation history
+
+Memory is automatically enabled when dependencies are available. No additional API keys required for basic memory functionality.
+
+**Optional Environment Variables:**
+```env
+# Memory Configuration (optional)
+MEMORY_VECTOR_DB_PATH=./chroma_db          # Vector database location
+MEMORY_COLLECTION_NAME=agent_memory        # ChromaDB collection name
+MEMORY_ENABLED=true                        # Enable/disable memory system
+```
+
 ### 3. Verify Installation
 
 Run the getting started demo:
@@ -83,9 +104,13 @@ agentic_spawn/
 │   ├── agent_registry.py   # Agent management system
 │   ├── state.py           # State management structures
 │   ├── utils.py           # Utility functions
+│   ├── memory.py          # Persistent memory system
+│   ├── tool_registry.py   # External tool management
+│   ├── tools.py           # Tool implementations
 │   └── agents/            # Specialized agents
 ├── tests/                  # Unit tests
-├── examples/               # Usage examples
+├── examples/               # Usage examples (5 demos)
+├── chroma_db/             # Vector database (created automatically)
 ├── requirements.txt        # Dependencies
 └── README.md              # Full documentation
 ```
@@ -117,6 +142,13 @@ python examples/example2_complex_task.py
 
 # Direct agent usage
 python examples/example3_direct_agents.py
+
+# Tool integration demo
+python examples/example4_tool_integration.py
+
+# Memory integration demo
+python examples/example5_memory_integration.py
+```
 ```
 
 ## Configuration Reference
