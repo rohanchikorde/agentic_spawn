@@ -58,12 +58,14 @@ agentic_spawn/
 │   ├── tool_registry.py      # External tool management system
 │   ├── tools.py              # Tool implementations (web search, code exec, etc.)
 │   ├── agents/               # Individual agent implementations
+│   │   ├── __init__.py
 │   │   ├── data_analyst.py   # Data analysis specialist (with tool integration)
 │   │   ├── researcher.py     # Research and information gathering
-│   │   └── code_generator.py # Code generation and engineering
+│   │   ├── code_generator.py # Code generation and engineering
+│   │   └── meta_learner.py   # Meta-learning agent for dynamic skill acquisition
 │   └── __init__.py
 ├── tests/                     # Comprehensive unit tests
-├── examples/                  # Usage examples (5 demos)
+├── examples/                  # Usage examples (8 demos)
 ├── requirements.txt           # Python dependencies
 ├── .env.example              # Environment variables template
 ├── chroma_db/                # Vector database storage (created automatically)
@@ -394,6 +396,12 @@ python -m pytest --cov=src tests/
 
 ## 📝 Examples
 
+### Getting Started Guide
+```bash
+python examples/getting_started.py
+```
+Interactive guide demonstrating core concepts and usage patterns.
+
 ### Example 1: Simple Task
 ```bash
 python examples/example1_simple_task.py
@@ -429,6 +437,12 @@ Demonstrates persistent memory and conversation continuity across sessions.
 python examples/example6_meta_learning.py
 ```
 Demonstrates dynamic skill acquisition and adaptation to novel tasks.
+
+### Memory System Demo
+```bash
+python examples/memory_demo.py
+```
+Demonstrates the memory system functionality without requiring API keys.
 
 ## 🎨 Customization
 
