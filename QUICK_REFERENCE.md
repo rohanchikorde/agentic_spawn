@@ -1,28 +1,26 @@
-"""
-Quick Reference Guide for AgentSpawn Framework
-"""
+# Quick Reference Guide for AgentSpawn Framework
 
-# ============================================================================
-# INSTALLATION
-# ============================================================================
-"""
+## INSTALLATION
+
 1. Install dependencies:
+   ```bash
    pip install -r requirements.txt
+   ```
 
 2. Create .env file:
+   ```bash
    cp .env.example .env
    # Edit .env and add your API key (OpenAI or OpenRouter)
    OPENAI_API_KEY=your_openai_api_key
    # OR
    OPENROUTER_API_KEY=your_openrouter_api_key
-"""
+   ```
 
-# ============================================================================
-# BASIC USAGE PATTERNS
-# ============================================================================
+## BASIC USAGE PATTERNS
 
-# Pattern 1: Use Orchestrator (Recommended for most tasks)
-"""
+### Pattern 1: Use Orchestrator (Recommended for most tasks)
+
+```python
 from src.orchestrator import Orchestrator
 
 orchestrator = Orchestrator(model_name="gpt-4")
@@ -31,10 +29,11 @@ result = orchestrator.process_task("Your task here")
 print(result['final_response'])
 print(result['task_metadata']['complexity'])
 print(result['spawned_agents'])
-"""
+```
 
-# Pattern 3: Tool Integration
-"""
+### Pattern 2: Tool Integration
+
+```python
 from src.tool_registry import get_tool_registry
 
 # Get available tools
@@ -53,10 +52,11 @@ result = db_tool.execute("SELECT 1", "SELECT")
 orchestrator = Orchestrator()
 result = orchestrator.process_task("Calculate statistics using Python")
 # Agents will automatically use code execution tool
-"""
+```
 
-# Pattern 4: Memory Integration
-"""
+### Pattern 3: Memory Integration
+
+```python
 from src.orchestrator import Orchestrator
 from src.memory import get_memory_manager
 
@@ -89,10 +89,11 @@ relevant = memory_manager.retrieve_memories("sales recommendations", limit=3)
 
 # Get context for new query
 context = memory_manager.get_relevant_context(thread_id, "pricing strategy")
-"""
+```
 
-# Pattern 3: Check Complexity Before Processing
-"""
+### Pattern 4: Check Complexity Before Processing
+
+```python
 from src.utils import extract_keywords, assess_task_complexity, detect_required_agents
 
 task = "Your task"
@@ -102,10 +103,11 @@ agents = detect_required_agents(task, keywords)
 
 print(f"Complexity: {complexity}")
 print(f"Agents needed: {agents}")
-"""
+```
 
-# Pattern 5: Meta-Learning Agent (AGI Feature)
-"""
+### Pattern 5: Meta-Learning Agent (AGI Feature)
+
+```python
 from src.agents.meta_learner import MetaLearningAgent
 
 # Initialize meta-learning agent
@@ -132,94 +134,86 @@ print(f"Learned skills: {list(skills.keys())}")
 orchestrator = Orchestrator()
 result = orchestrator.process_task("Design a board game about sustainable energy")
 # Meta-learner will be spawned for novel tasks
-"""
+```
 
-# ============================================================================
-# COMPLEXITY LEVELS REFERENCE
-# ============================================================================
-"""
-SIMPLE: 
-  - Direct questions: "What is...?", "Who is...?"
-  - Basic requests: "Define", "Explain", "Summarize"
-  - Action: Direct LLM reasoning, no agents spawned
+## COMPLEXITY LEVELS REFERENCE
 
-MODERATE:
-  - Analysis requests: "Analyze", "Compare", "Evaluate"
-  - Creation tasks: "Write", "Create", "Generate"
-  - Action: Spawn detected specialized agents
+**SIMPLE:**
+- Direct questions: "What is...?", "Who is...?"
+- Basic requests: "Define", "Explain", "Summarize"
+- Action: Direct LLM reasoning, no agents spawned
 
-COMPLEX:
-  - Research-heavy: "Research", "Investigate", "Deep dive"
-  - Multi-step: Multiple questions combined
-  - Advanced: "Optimization", "Strategy", "Advanced"
-  - Action: Spawn all detected agents, plus defaults
-"""
+**MODERATE:**
+- Analysis requests: "Analyze", "Compare", "Evaluate"
+- Creation tasks: "Write", "Create", "Generate"
+- Action: Spawn detected specialized agents
 
-# ============================================================================
-# AGENT TYPES REFERENCE
-# ============================================================================
-"""
-DATA_ANALYST:
-  - Detects: "analyze", "data", "statistics", "metric", "trend"
-  - Capabilities: statistical_analysis, trend_identification, forecasting
-  - Use when: Need insights from data or metrics
+**COMPLEX:**
+- Research-heavy: "Research", "Investigate", "Deep dive"
+- Multi-step: Multiple questions combined
+- Advanced: "Optimization", "Strategy", "Advanced"
+- Action: Spawn all detected agents, plus defaults
 
-RESEARCHER:
-  - Detects: "research", "investigate", "explore", "background"
-  - Capabilities: information_gathering, literature_review, context_analysis
-  - Use when: Need comprehensive background or comparison
+## AGENT TYPES REFERENCE
 
-CODE_GENERATOR:
-  - Detects: "code", "implement", "write", "algorithm", "script"
-  - Capabilities: code_generation, architecture_design, optimization
-  - Use when: Need code or implementation guidance
+**DATA_ANALYST:**
+- Detects: "analyze", "data", "statistics", "metric", "trend"
+- Capabilities: statistical_analysis, trend_identification, forecasting
+- Use when: Need insights from data or metrics
 
-META_LEARNER:
-  - Detects: Novel/unrecognized tasks, complex adaptation needs
-  - Capabilities: few_shot_learning, skill_acquisition, task_adaptation, generalization
-  - Use when: Task doesn't match existing agents or requires learning new skills
-  - AGI Feature: Enables dynamic capability expansion without code changes
-"""
+**RESEARCHER:**
+- Detects: "research", "investigate", "explore", "background"
+- Capabilities: information_gathering, literature_review, context_analysis
+- Use when: Need comprehensive background or comparison
 
-# ============================================================================
-# RETURN VALUE STRUCTURE
-# ============================================================================
-"""
-orchestrator.process_task(task) returns:
+**CODE_GENERATOR:**
+- Detects: "code", "implement", "write", "algorithm", "script"
+- Capabilities: code_generation, architecture_design, optimization
+- Use when: Need code or implementation guidance
+
+**META_LEARNER:**
+- Detects: Novel/unrecognized tasks, complex adaptation needs
+- Capabilities: few_shot_learning, skill_acquisition, task_adaptation, generalization
+- Use when: Task doesn't match existing agents or requires learning new skills
+- AGI Feature: Enables dynamic capability expansion without code changes
+
+## RETURN VALUE STRUCTURE
+
+`orchestrator.process_task(task)` returns:
+
+```json
 {
-  "final_response": str,              # Synthesized final response
+  "final_response": "string",
   "task_metadata": {
-    "task_id": str,                   # Unique task ID
-    "complexity": str,                # "simple", "moderate", or "complex"
-    "keywords": [str],                # Extracted keywords
-    "requires_multiple_agents": bool  # True if multiple agents needed
+    "task_id": "string",
+    "complexity": "string",
+    "keywords": ["string"],
+    "requires_multiple_agents": true
   },
   "spawned_agents": [
     {
-      "agent_type": str,              # e.g., "data_analyst"
-      "agent_id": str,                # e.g., "data_analyst_abc12345"
-      "status": str,                  # "initialized", "completed", "failed"
-      "result": str                   # Agent's output (if completed)
+      "agent_type": "string",
+      "agent_id": "string",
+      "status": "string",
+      "result": "string"
     }
   ],
-  "orchestrator_reasoning": str,      # Why these decisions were made
-  "workflow_status": str,             # Overall workflow status
-  "errors": [str]                     # Any errors encountered
+  "orchestrator_reasoning": "string",
+  "workflow_status": "string",
+  "errors": ["string"]
 }
-"""
+```
 
-# ============================================================================
-# COMMON TASKS
-# ============================================================================
+## COMMON TASKS
 
-# Task 1: Run tests
-"""
+### Task 1: Run tests
+```bash
 python -m pytest tests/
 python -m pytest tests/test_framework.py -v
-"""
+```
 
-# Task 2: Run examples
-"""
+### Task 2: Run examples
+```bash
 python examples/getting_started.py
 python examples/example1_simple_task.py
 python examples/example2_complex_task.py
@@ -227,25 +221,25 @@ python examples/example3_direct_agents.py
 python examples/example4_tool_integration.py
 python examples/example5_memory_integration.py
 python examples/example6_meta_learning.py
-"""
+```
 
-# Task 3: Check code quality
-"""
+### Task 3: Check code quality
+```bash
 python -m pytest tests/ --cov=src
-"""
+```
 
-# ============================================================================
-# CUSTOMIZATION
-# ============================================================================
+## CUSTOMIZATION
 
-# Modify Complexity Keywords (in src/utils.py):
-"""
+### Modify Complexity Keywords (in src/utils.py):
+
+```python
 COMPLEXITY_KEYWORDS[ComplexityLevel.SIMPLE].extend(["your_keyword"])
 AGENT_KEYWORDS["data_analyst"].extend(["your_keyword"])
-"""
+```
 
-# Register Custom Agent:
-"""
+### Register Custom Agent:
+
+```python
 from src.agent_registry import get_registry, AgentConfig
 from src.state import AgentType
 
@@ -258,24 +252,21 @@ config = AgentConfig(
     capabilities=["capability1", "capability2"]
 )
 registry.register_agent(config)
-"""
+```
 
-# ============================================================================
-# TROUBLESHOOTING
-# ============================================================================
-"""
-Q: "OpenAI API key not found"
+## TROUBLESHOOTING
+
+**Q: "OpenAI API key not found"**
 A: Create .env file and set OPENAI_API_KEY
 
-Q: "Agent type not found"
+**Q: "Agent type not found"**
 A: Check get_registry().list_agents() to see available agents
 
-Q: "Module not found"
+**Q: "Module not found"**
 A: Ensure src/ is in Python path: sys.path.insert(0, 'src')
 
-Q: Tests failing
+**Q: Tests failing**
 A: Run: python -m pytest tests/ -v to see detailed output
-"""
 
 # ============================================================================
 # PERFORMANCE TIPS
@@ -288,6 +279,3 @@ A: Run: python -m pytest tests/ -v to see detailed output
    - Creative: higher (0.7-0.9)
 4. Batch similar tasks together
 5. Monitor API usage from orchestrator.process_task() results
-"""
-
-print(__doc__)
