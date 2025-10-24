@@ -1,4 +1,4 @@
-# AgentSpawn: AGI-Advancing Multi-Agent Framework
+# AgenticSpawn: AGI-Advancing Multi-Agent Framework
 
 A production-ready Python framework for dynamic multi-agent orchestration that advances toward Artificial General Intelligence (AGI). AgentSpawn combines traditional code logic with LLM-based reasoning, featuring **Meta-Learning Agents** that dynamically acquire new skills and adapt to novel tasks without predefined templates.
 
